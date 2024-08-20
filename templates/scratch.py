@@ -104,7 +104,7 @@ while True:
     elif choice == '4':
         logout_admin()
     else:
-        print("Invalid Choice. Please try again.")
+        print("Invalid Choices. Please try again.")
 
 if __name__ == "__main__":
     main()
