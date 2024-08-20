@@ -78,7 +78,7 @@ def business_menu(KPSTR):
         elif choice == '3':
             logout_admin()
         else:
-            print("Invalid choice. Please try again.")
+            print("Invalid choices. Please try again.")
 
 def main():
     businesses = {
