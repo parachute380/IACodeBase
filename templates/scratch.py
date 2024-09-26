@@ -5,8 +5,8 @@ from getpass import getpass
 import bcrypt
 
 
-def init_db(KPSTR):
-    conn = sqlite3.connect('KPSTR.db')
+def init_db():
+    conn = sqlite3.connect(Admin_KPSTR.db)
     cursor = conn.cursor()
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
@@ -16,8 +16,8 @@ def init_db(KPSTR):
     )
     ''')
 
-def register_user(registrations_KPSTR, hashed_password=None):
-    conn = sqlite3.connect(registrations_KPSTR.db)
+def register_user(hashed_password=None):
+    conn = sqlite3.connect(Admin_KPSTR.db)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -35,8 +35,12 @@ def register_user(registrations_KPSTR, hashed_password=None):
        print("Admin registration sucessful! Welcome to KPSTR!")
     conn.close()
 
-def login_user(login_KPSTR: )
-    conn = _sqlite3.connect(login_KPSTR.db)
+
+class Admin_KPSTR:
+    pass
+
+def login_user():
+    conn = _sqlite3.connect(Admin_KPSTR.db)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -64,7 +68,7 @@ def logout_admin():
      pass
 
 
-def business_menu(KPSTR):
+def business_menu(db_name):
     while True:
         print("\n1. Register")
         print("2. Login")
@@ -72,9 +76,9 @@ def business_menu(KPSTR):
         choice = input("enter your choice:")
 
         if choice == '1':
-            register_user(registrations_KPSTR)
+            register_user()
         elif choice == '2':
-            login_user(login_KPSTR=)
+            login_user()
         elif choice == '3':
             logout_admin()
         else:
@@ -83,28 +87,29 @@ def business_menu(KPSTR):
 def main():
     businesses = {
         '1': 'Khatipatang.db',
-        '2': 'Sweet Tickles.db',
+        '2': 'Sajili.db',
         '3': 'Ratnakari.db'
     }
 
-#Initialize Database
+
 for db in businesses.values():
-    init_db(KPSTR=)
+    init_db(db)
 
-while True:
-    print("\nSelect a Business:")
-    print("1. Khatipatang")
-    print("2. Sweet Tickles")
-    print("3. Ratnakari")
-    print("4. Exit")
-    choice = input("Choose an option:")
+    while True:
+        print("\nSelect a Business:")
+        print("1. Khatipatang")
+        print("2. Sajili")
+        print("3. Ratnakari")
+        print("4. Exit")
+        choice = input("Enter your choice: ")
 
-    if choice in businesses:
-        business_menu(businesses[choice])
-    elif choice == '4':
-        logout_admin()
-    else:
-        print("Invalid Choices. Please try again.")
+        if choice in businesses:
+            business_menu(businesses[choice])
+        elif choice == '4':
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
 
 if __name__ == "__main__":
     main()

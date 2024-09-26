@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Vendor</title>
+</head>
+<body>
+    <h1>Delete Vendor</h1>
+    <form method="POST" action="/vendor/delete/{{ db_name }}">
+        <label for="vendor_id">Vendor ID:</label>
+        <input type="number" name="vendor_id" required><br>
+        <input type="submit" value="Delete Vendor">
+    </form>
+</body>
+</html>

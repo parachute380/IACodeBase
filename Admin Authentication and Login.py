@@ -2,6 +2,9 @@ import sqlite3
 from getpass import getpass
 import bcrypt
 
+from app import register_user, login_user
+
+
 def init_db():
     conn = sqlite3.connect('Admin_KPSTR.db')
     cursor = conn.cursor()

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Vendor</title>
+</head>
+<body>
+    <h1>Add Vendor</h1>
+    <form method="POST" action="{{ url_for('add_vendor', db_name=db_name) }}">
+        <label>Supplier Name:</label>
+        <input type="text" name="name" required><br>
+        <label>Contact Info:</label>
+        <input type="text" name="contact_info" required><br>
+        <label>Website URL:</label>
+        <input type="url" name="website" required><br>
+        <label>Item Descriptions:</label>
+        <textarea name="item_descriptions"></textarea><br>
+        <label>Images (comma-separated):</label>
+        <input type="text" name="images"><br>
+        <label>Shipping Costs:</label>
+        <input type="number" step="0.01" name="shipping_costs" required><br>
+        <label>Payment Terms:</label>
+        <input type="text" name="payment_terms" required><br>
+        <label>Lead Time:</label>
+        <input type="text" name="lead_time"><br>
+        <label>Return Policy:</label>
+        <input type="text" name="return_policy"><br>
+        <label>Payment History:</label>
+        <textarea name="payment_history"></textarea><br>
+        <button type="submit">Add Vendor</button>
+    </form>
+</body>
+</html>
+
+

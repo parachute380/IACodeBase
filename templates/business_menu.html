@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Menu</title>
+</head>
+<body>
+    <h1>Business Management</h1>
+    <form method="POST">
+        <label for="db_name">Select Business:</label>
+        <select name="db_name" required>
+            <option value="Khatipatang.db">Khatipatang</option>
+            <option value="Sajili.db">Sajili</option>
+            <option value="Ratnakari.db">Ratnakari</option>
+        </select><br><br>
+
+        <label>Select Action:</label><br>
+        <input type="radio" id="add" name="choice" value="1" required>
+        <label for="add">Add Vendor</label><br>
+        <input type="radio" id="edit" name="choice" value="2">
+        <label for="edit">Edit Vendor</label><br>
+        <input type="radio" id="delete" name="choice" value="3">
+        <label for="delete">Delete Vendor</label><br>
+        <input type="radio" id="view" name="choice" value="4">
+        <label for="view">View Vendors</label><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
