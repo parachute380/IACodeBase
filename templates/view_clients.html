@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Client List{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Client List</h2>
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Email</th>
+                <th>Item</th>
+                <th>Delivery Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td>{{ client['client_id'] }}</td>
+                <td>{{ client['name'] }}</td>
+                <td>{{ client['phone_number'] }}</td>
+                <td>{{ client['email_address'] }}</td>
+                <td>{{ client['item_name'] }}</td>
+                <td>{{ client['delivery_date'] }}</td>
+                <td>
+                    <a href="{{ url_for('edit_client', db_name=db_name, client_id=client['client_id']) }}" class="btn btn-warning btn-sm">Edit</a>
+                    <form method="POST" action="{{ url_for('delete_client', db_name=db_name, client_id=client['client_id']) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

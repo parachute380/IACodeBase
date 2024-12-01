@@ -16,30 +16,49 @@
                 </select>
             </div>
 
+            <!-- Vendor Management Actions -->
             <fieldset class="mb-4">
-                <legend class="form-label">Select Action:</legend>
+                <legend class="form-label">Vendor Management:</legend>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" id="add" name="choice" value="1" required>
-                    <label class="form-check-label" for="add">Add Vendor</label>
+                    <input class="form-check-input" type="radio" id="add_vendor" name="choice" value="1" required>
+                    <label class="form-check-label" for="add_vendor">Add Vendor</label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" id="edit" name="choice" value="2">
-                    <label class="form-check-label" for="edit">Edit Vendor</label>
+                    <input class="form-check-input" type="radio" id="edit_vendor" name="choice" value="2">
+                    <label class="form-check-label" for="edit_vendor">Edit Vendor</label>
                 </div>
-                <!-- <div class="form-check">
-                    <input class="form-check-input" type="radio" id="delete" name="choice" value="3">
-                    <label class="form-check-label" for="delete">Delete Vendor</label>
-                </div> -->
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" id="view" name="choice" value="4">
-                    <label class="form-check-label" for="view">View Vendors</label>
+                    <input class="form-check-input" type="radio" id="view_vendor" name="choice" value="4">
+                    <label class="form-check-label" for="view_vendor">View Vendors</label>
                 </div>
             </fieldset>
 
-            <!-- Vendor ID Field (Initially Hidden) -->
+            <!-- Client Management Actions -->
+            <fieldset class="mb-4">
+                <legend class="form-label">Client Management:</legend>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="add_client" name="choice" value="5">
+                    <label class="form-check-label" for="add_client">Add Client</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="edit_client" name="choice" value="6">
+                    <label class="form-check-label" for="edit_client">Edit Client</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="view_client" name="choice" value="8">
+                    <label class="form-check-label" for="view_client">View Clients</label>
+                </div>
+            </fieldset>
+
+            <!-- Hidden Fields for IDs -->
             <div class="mb-4" id="vendor-id-field" style="display: none;">
-                <label for="vendor_id" class="form-label">Enter Vendor ID (for Edit/Delete):</label>
+                <label for="vendor_id" class="form-label">Enter Vendor ID (for Edit):</label>
                 <input type="number" class="form-control" name="vendor_id" id="vendor_id" placeholder="Enter Vendor ID">
+            </div>
+
+            <div class="mb-4" id="client-id-field" style="display: none;">
+                <label for="client_id" class="form-label">Enter Client ID (for Edit):</label>
+                <input type="number" class="form-control" name="client_id" id="client_id" placeholder="Enter Client ID">
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Submit</button>
@@ -48,18 +67,26 @@
 </div>
 
 <script>
-    // Show/Hide Vendor ID field based on selected action
+    // Show/Hide Vendor and Client ID fields based on selected action
     const businessForm = document.getElementById('business-form');
     const vendorIdField = document.getElementById('vendor-id-field');
+    const clientIdField = document.getElementById('client-id-field');
 
     businessForm.addEventListener('change', () => {
         const selectedAction = document.querySelector('input[name="choice"]:checked').value;
 
-        // Show Vendor ID field only for Edit/Delete actions
-        if (selectedAction === '2' || selectedAction === '3') {
+        // Show Vendor ID field for Edit Vendor (value = 2)
+        if (selectedAction === '2') {
             vendorIdField.style.display = 'block';
+            clientIdField.style.display = 'none';
+        }
+        // Show Client ID field for Edit Client (value = 6)
+        else if (selectedAction === '6') {
+            clientIdField.style.display = 'block';
+            vendorIdField.style.display = 'none';
         } else {
             vendorIdField.style.display = 'none';
+            clientIdField.style.display = 'none';
         }
     });
 </script>

@@ -9,7 +9,6 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 
-# Initialize the databases
 def init_db():
     # Initialize the admin database
     conn = sqlite3.connect('Admin_KPSTR.db')
@@ -34,6 +33,53 @@ def init_db():
                    ''')
     conn.commit()
     conn.close()
+
+    # Initialize the business databases
+    for db_name in ['Khatipatang.db', 'Sajili.db', 'Ratnakari.db']:
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+        
+        # Create the vendors table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS vendors (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            contact_info TEXT,
+            website TEXT,
+            item_descriptions TEXT,
+            images TEXT,
+            shipping_costs REAL,
+            payment_terms TEXT,
+            lead_time TEXT,
+            return_policy TEXT,
+            payment_history TEXT
+        )
+        ''')
+
+        # Create the clients table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS clients (
+            client_id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            phone_number TEXT,
+            email_address TEXT,
+            item_name TEXT,
+            quantity_ordered INTEGER,
+            shipping_address TEXT,
+            shipping_cost REAL,
+            payment_terms TEXT,
+            customised BOOLEAN,
+            order_specifications TEXT,
+            lead_time INTEGER,
+            delivery_date TEXT,
+            order_history TEXT,
+            return_policy TEXT,
+            image_file_path TEXT
+        )
+        ''')
+        conn.commit()
+        conn.close()
+
 
     # Initialize the business databases
     for db_name in ['Khatipatang.db', 'Sajili.db', 'Ratnakari.db']:
@@ -166,6 +212,7 @@ def business_menu():
         choice = request.form['choice']
         db_name = request.form['db_name']
         vendor_id = request.form.get('vendor_id')  # Retrieve Vendor ID if provided
+        client_id = request.form.get('client_id')  # Retrieve Client ID if provided
 
         if choice == '1':  # Add Vendor
             return redirect(url_for('add_vendor', db_name=db_name))
@@ -179,10 +226,23 @@ def business_menu():
             return redirect(url_for('delete_vendor', db_name=db_name, vendor_id=vendor_id))
         elif choice == '4':  # View Vendors
             return redirect(url_for('view_vendors', db_name=db_name))
+        elif choice == '5':  # Add Client
+            return redirect(url_for('add_client', db_name=db_name))
+        elif choice == '6':  # Edit Client
+            if not client_id:
+                return "Client ID is required for editing."
+            return redirect(url_for('edit_client', db_name=db_name, client_id=client_id))
+        elif choice == '7':  # Delete Client
+            if not client_id:
+                return "Client ID is required for deletion."
+            return redirect(url_for('delete_client', db_name=db_name, client_id=client_id))
+        elif choice == '8':  # View Clients
+            return redirect(url_for('view_clients', db_name=db_name))
         else:
             return "Invalid choice. Please try again."
 
     return render_template('business_menu.html')
+
 
 
 
@@ -300,6 +360,132 @@ def view_vendors(db_name):
 
     return render_template('view_vendors.html', vendors=vendors, db_name=db_name)
 
+# Route to View Clients
+@app.route('/clients/view/<db_name>', methods=['GET'])
+def view_clients(db_name):
+    conn = sqlite3.connect(db_name)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT * FROM clients')
+    clients = cursor.fetchall()
+    conn.close()
+
+    return render_template('view_clients.html', clients=clients, db_name=db_name)
+
+
+# Route to Add Client
+@app.route('/clients/add/<db_name>', methods=['GET', 'POST'])
+def add_client(db_name):
+    if request.method == 'POST':
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+
+        # Fetch data from the form
+        name = request.form['name']
+        phone_number = request.form['phone_number']
+        email_address = request.form['email_address']
+        item_name = request.form['item_name']
+        quantity_ordered = request.form['quantity_ordered']
+        shipping_address = request.form['shipping_address']
+        shipping_cost = request.form['shipping_cost']
+        payment_terms = request.form['payment_terms']
+        customised = request.form.get('customised', 'off') == 'on'
+        order_specifications = request.form['order_specifications']
+        lead_time = request.form['lead_time']
+        delivery_date = request.form['delivery_date']
+        order_history = request.form['order_history']
+        return_policy = request.form['return_policy']
+
+        # Handle image upload
+        image_file = request.files['image_file']
+        if image_file:
+            image_file_path = os.path.join('static/uploads', secure_filename(image_file.filename))
+            image_file.save(image_file_path)
+        else:
+            image_file_path = None
+
+        # Insert into database
+        cursor.execute('''
+            INSERT INTO clients (
+                name, phone_number, email_address, item_name, quantity_ordered,
+                shipping_address, shipping_cost, payment_terms, customised,
+                order_specifications, lead_time, delivery_date, order_history,
+                return_policy, image_file_path
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (name, phone_number, email_address, item_name, quantity_ordered,
+              shipping_address, shipping_cost, payment_terms, customised,
+              order_specifications, lead_time, delivery_date, order_history,
+              return_policy, image_file_path))
+        
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_clients', db_name=db_name))
+
+    return render_template('add_client.html', db_name=db_name)
+
+
+# Route to Edit Client
+@app.route('/clients/edit/<db_name>/<int:client_id>', methods=['GET', 'POST'])
+def edit_client(db_name, client_id):
+    conn = sqlite3.connect(db_name)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        # Fetch updated data from the form
+        name = request.form['name']
+        phone_number = request.form['phone_number']
+        email_address = request.form['email_address']
+        item_name = request.form['item_name']
+        quantity_ordered = request.form['quantity_ordered']
+        shipping_address = request.form['shipping_address']
+        shipping_cost = request.form['shipping_cost']
+        payment_terms = request.form['payment_terms']
+        customised = request.form.get('customised', 'off') == 'on'
+        order_specifications = request.form['order_specifications']
+        lead_time = request.form['lead_time']
+        delivery_date = request.form['delivery_date']
+        order_history = request.form['order_history']
+        return_policy = request.form['return_policy']
+
+        # Update the database
+        cursor.execute('''
+            UPDATE clients
+            SET name = ?, phone_number = ?, email_address = ?, item_name = ?, quantity_ordered = ?,
+                shipping_address = ?, shipping_cost = ?, payment_terms = ?, customised = ?,
+                order_specifications = ?, lead_time = ?, delivery_date = ?, order_history = ?,
+                return_policy = ?
+            WHERE client_id = ?
+        ''', (name, phone_number, email_address, item_name, quantity_ordered,
+              shipping_address, shipping_cost, payment_terms, customised,
+              order_specifications, lead_time, delivery_date, order_history,
+              return_policy, client_id))
+        
+        conn.commit()
+        conn.close()
+        return redirect(url_for('view_clients', db_name=db_name))
+
+    # Fetch client details for GET request
+    cursor.execute('SELECT * FROM clients WHERE client_id = ?', (client_id,))
+    client = cursor.fetchone()
+    conn.close()
+
+    return render_template('edit_client.html', client=client, db_name=db_name)
+
+
+# Route to Delete Client
+@app.route('/clients/delete/<db_name>/<int:client_id>', methods=['POST'])
+def delete_client(db_name, client_id):
+    conn = sqlite3.connect(db_name)
+    cursor = conn.cursor()
+
+    cursor.execute('DELETE FROM clients WHERE client_id = ?', (client_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('view_clients', db_name=db_name))
+
 @app.route('/init_db')
 def initialize_database():
     init_db()
@@ -342,6 +528,7 @@ def fix_table(db_name):
         return f"Vendors table created successfully in {db_name}."
     except sqlite3.Error as e:
         return f"Error creating table in {db_name}: {str(e)}"
+    
 
 
 

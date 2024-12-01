@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Client{% endblock %}
+
+{% block content %}
+<div class="card mx-auto mt-5" style="max-width: 600px;">
+    <div class="card-body">
+        <h2 class="card-title text-center">Edit Client</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="name" class="form-label">Client Name:</label>
+                <input type="text" class="form-control" name="name" id="name" value="{{ client['name'] }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="phone_number" class="form-label">Phone Number:</label>
+                <input type="text" class="form-control" name="phone_number" id="phone_number" value="{{ client['phone_number'] }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="email_address" class="form-label">Email Address:</label>
+                <input type="email" class="form-control" name="email_address" id="email_address" value="{{ client['email_address'] }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="item_name" class="form-label">Item Name:</label>
+                <input type="text" class="form-control" name="item_name" id="item_name" value="{{ client['item_name'] }}">
+            </div>
+            <div class="mb-3">
+                <label for="quantity_ordered" class="form-label">Quantity Ordered:</label>
+                <input type="number" class="form-control" name="quantity_ordered" id="quantity_ordered" value="{{ client['quantity_ordered'] }}">
+            </div>
+            <div class="mb-3">
+                <label for="shipping_address" class="form-label">Shipping Address:</label>
+                <textarea class="form-control" name="shipping_address" id="shipping_address">{{ client['shipping_address'] }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="shipping_cost" class="form-label">Shipping Cost:</label>
+                <input type="number" class="form-control" step="0.01" name="shipping_cost" id="shipping_cost" value="{{ client['shipping_cost'] }}">
+            </div>
+            <div class="mb-3">
+                <label for="payment_terms" class="form-label">Payment Terms:</label>
+                <input type="text" class="form-control" name="payment_terms" id="payment_terms" value="{{ client['payment_terms'] }}">
+            </div>
+            <div class="mb-3">
+                <label for="customised" class="form-label">Customised:</label>
+                <input class="form-check-input" type="checkbox" name="customised" id="customised" {% if client['customised'] %}checked{% endif %}>
+            </div>
+            <div class="mb-3">
+                <label for="order_specifications" class="form-label">Order Specifications:</label>
+                <textarea class="form-control" name="order_specifications" id="order_specifications">{{ client['order_specifications'] }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="lead_time" class="form-label">Lead Time:</label>
+                <input type="number" class="form-control" name="lead_time" id="lead_time" value="{{ client['lead_time'] }}">
+            </div>
+            <div class="mb-3">
+                <label for="delivery_date" class="form-label">Delivery Date:</label>
+                <input type="date" class="form-control" name="delivery_date" id="delivery_date" value="{{ client['delivery_date'] }}">
+            </div>
+            <div class="mb-3">
+                <label for="order_history" class="form-label">Order History:</label>
+                <textarea class="form-control" name="order_history" id="order_history">{{ client['order_history'] }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="return_policy" class="form-label">Return Policy:</label>
+                <textarea class="form-control" name="return_policy" id="return_policy">{{ client['return_policy'] }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="image_file" class="form-label">Upload Image:</label>
+                <input class="form-control" type="file" name="image_file" id="image_file">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Update Client</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
