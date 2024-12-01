@@ -1,18 +1,22 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>Login Admin</title>
-  </head>
-  <body>
-    <h1>Login Admin</h1>
-    <form method="post">
-      <label for="username">Username:</label>
-      <input type="text" name="username" id="username" required>
-      <br>
-      <label for="password">Password:</label>
-      <input type="password" name="password" id="password" required>
-      <br>
-      <input type="submit" value="Login">
-    </form>
-  </body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Login Admin{% endblock %}
+
+{% block content %}
+<div class="card mx-auto mt-5" style="max-width: 500px;">
+    <div class="card-body">
+        <h2 class="card-title text-center">Login Admin</h2>
+        <form method="post">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username:</label>
+                <input type="text" class="form-control" name="username" id="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password:</label>
+                <input type="password" class="form-control" name="password" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

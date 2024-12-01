@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 from getpass import getpass
 import bcrypt;
-from templates.vendorDetails import vendor_menu
+from vendorDetails import vendor_menu
 
 
 app = Flask(__name__)
@@ -11,6 +11,7 @@ app.secret_key = 'your_secret_key'
 
 # Initialize the databases
 def init_db():
+    # Initialize the admin database
     conn = sqlite3.connect('Admin_KPSTR.db')
     cursor = conn.cursor()
     cursor.execute('''
@@ -22,6 +23,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+    # Initialize the users database
     conn = sqlite3.connect('usersKPSTR.db')
     cursor = conn.cursor()
     cursor.execute('''
@@ -32,6 +34,29 @@ def init_db():
                    ''')
     conn.commit()
     conn.close()
+
+    # Initialize the business databases
+    for db_name in ['Khatipatang.db', 'Sajili.db', 'Ratnakari.db']:
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS vendors (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            contact_info TEXT,
+            website TEXT,
+            item_descriptions TEXT,
+            images TEXT,
+            shipping_costs REAL,
+            payment_terms TEXT,
+            lead_time TEXT,
+            return_policy TEXT,
+            payment_history TEXT
+        )
+        ''')
+        conn.commit()
+        conn.close()
+
 
 
 # Routes
@@ -140,21 +165,25 @@ def business_menu():
     if request.method == 'POST':
         choice = request.form['choice']
         db_name = request.form['db_name']
+        vendor_id = request.form.get('vendor_id')  # Retrieve Vendor ID if provided
 
-        if choice == '1':
+        if choice == '1':  # Add Vendor
             return redirect(url_for('add_vendor', db_name=db_name))
-        elif choice == '2':
-            return redirect(url_for('edit_vendor', db_name=db_name))  # You may want to add vendor_id for editing
-        elif choice == '3':
-            return redirect(url_for('delete_vendor', db_name=db_name))  # You may want to add vendor_id for deletion
-        elif choice == '4':
+        elif choice == '2':  # Edit Vendor
+            if not vendor_id:
+                return "Vendor ID is required for editing."
+            return redirect(url_for('edit_vendor', db_name=db_name, vendor_id=vendor_id))
+        elif choice == '3':  # Delete Vendor
+            if not vendor_id:
+                return "Vendor ID is required for deletion."
+            return redirect(url_for('delete_vendor', db_name=db_name, vendor_id=vendor_id))
+        elif choice == '4':  # View Vendors
             return redirect(url_for('view_vendors', db_name=db_name))
-        elif choice == '5':
-            return redirect(url_for('home'))
         else:
             return "Invalid choice. Please try again."
 
     return render_template('business_menu.html')
+
 
 
 @app.route('/vendor/add/<db_name>', methods=['GET', 'POST'])
@@ -186,53 +215,80 @@ def add_vendor(db_name):
 
         conn.commit()
         conn.close()
-        return render_template('vendor_added.html', name=name)  # Success page
-    return render_template('add_vendor.html')  # Render the form on GET request
+        return redirect(url_for('view_vendors', db_name=db_name))
+    return render_template('add_vendor.html', db_name=db_name)
 
 
-
-def edit_vendor(db_name):
+@app.route('/vendor/edit/<db_name>/<int:vendor_id>', methods=['GET', 'POST'])
+def edit_vendor(db_name, vendor_id):
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
 
-    vendor_id = int(input("Enter Vendor ID to edit: "))
+    if request.method == 'POST':
+        # Fetch updated data from the form
+        name = request.form['name']
+        contact_info = request.form['contact_info']
+        website = request.form['website']
+        item_descriptions = request.form['item_descriptions']
+        images = request.form['images']
+        shipping_costs = float(request.form['shipping_costs'])
+        payment_terms = request.form['payment_terms']
+        lead_time = request.form['lead_time']
+        return_policy = request.form['return_policy']
+        payment_history = request.form['payment_history']
 
-    name = input("Enter Vendor Name: ")
-    contact_info = input("Enter Contact Number: ")
-    website = input("Enter Website URL: ")
-    item_descriptions = input("Enter Item Descriptions: ")
-    images = input("Enter Images (comma-separated paths): ")
-    lead_time = input("Enter Lead Time of Production: ")
-    shipping_costs = float(input("Enter Shipping Costs: "))
-    payment_terms = input("Enter Payment Terms: ")
-    return_policy = input("Enter Return Policy: ")
-    payment_history = input("Enter Payment History: ")
+        # Update the vendor in the database
+        cursor.execute('''
+        UPDATE vendors
+        SET name = ?, contact_info = ?, website = ?, item_descriptions = ?, images = ?,
+            shipping_costs = ?, payment_terms = ?, lead_time = ?, return_policy = ?, payment_history = ?
+        WHERE id = ?
+        ''', (name, contact_info, website, item_descriptions, images,
+              shipping_costs, payment_terms, lead_time, return_policy, payment_history, vendor_id))
+        conn.commit()
+        conn.close()
 
-    cursor.execute('''
-    UPDATE vendors SET 
-        name = ?, contact_info = ?, website = ?, item_descriptions = ?, images = ?, 
-        shipping_costs = ?, payment_terms = ?, lead-time = ?, return_policy = ?, payment_history = ?
-    WHERE id = ?
-    ''', (name, contact_info, website, item_descriptions, images, shipping_costs,
-          payment_terms, return_policy, payment_history, vendor_id))
+        return redirect(url_for('view_vendors', db_name=db_name))
 
-    conn.commit()
+    # Fetch vendor details for GET request
+    cursor.execute('SELECT * FROM vendors WHERE id = ?', (vendor_id,))
+    vendor = cursor.fetchone()
     conn.close()
-    print("Vendor Details updated successfully!")
+
+    if not vendor:
+        return "Vendor not found.", 404
+
+    # Convert vendor row into a dictionary for easier handling in the template
+    vendor_dict = {
+        'id': vendor[0],
+        'name': vendor[1],
+        'contact_info': vendor[2],
+        'website': vendor[3],
+        'item_descriptions': vendor[4],
+        'images': vendor[5],
+        'shipping_costs': vendor[6],
+        'payment_terms': vendor[7],
+        'lead_time': vendor[8],
+        'return_policy': vendor[9],
+        'payment_history': vendor[10],
+    }
+
+    return render_template('edit_vendor.html', vendor=vendor_dict, db_name=db_name)
 
 
-def delete_vendor(db_name):
+
+@app.route('/vendor/delete/<db_name>/<int:vendor_id>', methods=['POST'])
+def delete_vendor(db_name, vendor_id):
     conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
-
-    vendor_id = int(input("Enter Vendor ID to delete: "))
-
     cursor.execute('DELETE FROM vendors WHERE id = ?', (vendor_id,))
-
     conn.commit()
     conn.close()
-    print("Vendor deleted successfully!")
 
+    return redirect(url_for('view_vendors', db_name=db_name))
+
+
+@app.route('/vendor/view/<db_name>', methods=['GET'])
 def view_vendors(db_name):
     conn = sqlite3.connect(db_name)
     conn.row_factory = sqlite3.Row
@@ -240,70 +296,55 @@ def view_vendors(db_name):
 
     cursor.execute('SELECT * FROM vendors')
     vendors = cursor.fetchall()
-
-    for vendor in vendors:
-        print(f"ID: {vendor['id']}")
-        print(f"Name: {vendor['name']}")
-        print(f"Contact Info: {vendor['contact_info']}")
-        print(f"Website: {vendor['website']}")
-        print(f"Item Descriptions: {vendor['item_descriptions']}")
-        print(f"Images: {vendor['images']}")
-        print(f"Shipping Costs: {vendor['shipping_costs']}")
-        print(f"Payment Terms: {vendor['payment_terms']}")
-        print(f"Lead Time of Production: {vendor['lead_time']}")
-        print(f"Return Policy: {vendor['return_policy']}")
-        print(f"Payment History: {vendor['payment_history']}")
-        print('-' * 40)
-
     conn.close()
 
+    return render_template('view_vendors.html', vendors=vendors, db_name=db_name)
 
-def main():
-    businesses = {
-        '1': 'Khatipatang.db',
-        '2': 'Sajili.db',
-        '3': 'Ratnakari.db'
-    }
+@app.route('/init_db')
+def initialize_database():
+    init_db()
+    return "Databases initialized successfully!"
 
-    while True:
-        print("\nSelect a Business:")
-        print("1. Khatipatang")
-        print("2. Sajili")
-        print("3. Ratnakari")
-        print("4. Exit")
-        choice = input("Choose an option:")
+@app.route('/check_tables/<db_name>')
+def check_tables(db_name):
+    try:
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
+        conn.close()
+        return f"Tables in {db_name}: {tables}"
+    except sqlite3.Error as e:
+        return f"Error checking tables in {db_name}: {str(e)}"
 
-        if choice in businesses.keys():
-            db_name = businesses[choice]
-            print(f"\nYou selected business: {db_name}")
-            business_menu(db_name)  # Now correctly passing db_name as an argument
-        elif choice == '4':
-            print("Exiting...")
-            break
-        else:
-            print("Invalid choice. Please try again.")
+@app.route('/fix_table/<db_name>')
+def fix_table(db_name):
+    try:
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS vendors (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            contact_info TEXT,
+            website TEXT,
+            item_descriptions TEXT,
+            images TEXT,
+            shipping_costs REAL,
+            payment_terms TEXT,
+            lead_time TEXT,
+            return_policy TEXT,
+            payment_history TEXT
+        )
+        ''')
+        conn.commit()
+        conn.close()
+        return f"Vendors table created successfully in {db_name}."
+    except sqlite3.Error as e:
+        return f"Error creating table in {db_name}: {str(e)}"
+
 
 
 if __name__ == "__main__":
+    init_db()
     app.run(debug=True)
-
-
-def business_menu(db_name):
-    while True:
-        print("\n1. Register")
-        print("2. Login")
-        print("3. Vendor Management")
-        print("4. Exit")
-        choice = input("Enter your choice: ")
-
-        if choice == '1':
-            register_user(db_name)
-        elif choice == '2':
-            if login_user(db_name):
-                vendor_menu(db_name)
-        elif choice == '3':
-            vendor_menu(db_name)
-        elif choice == '4':
-            break
-        else:
-            print("Invalid choice. Please try again.")

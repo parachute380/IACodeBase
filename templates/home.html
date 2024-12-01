@@ -1,13 +1,16 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>Home</title>
-  </head>
-  <body>
-    <h1>Welcome to KPSTR</h1>
-    <a href="{{ url_for('register_admin') }}">Register Admin</a>
-    <a href="{{ url_for('login_admin') }}">Login Admin</a>
-    <a href="{{ url_for('register_user') }}">Register User</a>
-    <a href="{{ url_for('login_user') }}">Login User</a>
-  </body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="my-4">Welcome to KPSTR</h1>
+    <p class="lead">Manage vendors, users, and businesses effortlessly with KPSTR.</p>
+    <div class="d-grid gap-2 col-6 mx-auto">
+        <a class="btn btn-primary mb-2" href="{{ url_for('register_admin') }}">Register Admin</a>
+        <a class="btn btn-secondary mb-2" href="{{ url_for('login_admin') }}">Login Admin</a>
+        <a class="btn btn-success mb-2" href="{{ url_for('register_user') }}">Register User</a>
+        <a class="btn btn-info mb-2" href="{{ url_for('login_user') }}">Login User</a>
+    </div>
+</div>
+{% endblock %}

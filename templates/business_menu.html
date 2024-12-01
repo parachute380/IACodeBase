@@ -1,31 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Menu</title>
-</head>
-<body>
-    <h1>Business Management</h1>
-    <form method="POST">
-        <label for="db_name">Select Business:</label>
-        <select name="db_name" required>
-            <option value="Khatipatang.db">Khatipatang</option>
-            <option value="Sajili.db">Sajili</option>
-            <option value="Ratnakari.db">Ratnakari</option>
-        </select><br><br>
+{% extends 'base.html' %}
 
-        <label>Select Action:</label><br>
-        <input type="radio" id="add" name="choice" value="1" required>
-        <label for="add">Add Vendor</label><br>
-        <input type="radio" id="edit" name="choice" value="2">
-        <label for="edit">Edit Vendor</label><br>
-        <input type="radio" id="delete" name="choice" value="3">
-        <label for="delete">Delete Vendor</label><br>
-        <input type="radio" id="view" name="choice" value="4">
-        <label for="view">View Vendors</label><br><br>
+{% block title %}Business Management{% endblock %}
 
-        <input type="submit" value="Submit">
-    </form>
-</body>
-</html>
+{% block content %}
+<div class="card mx-auto mt-5" style="max-width: 600px;">
+    <div class="card-body">
+        <h2 class="card-title text-center">Business Management</h2>
+        <form method="POST" id="business-form">
+            <div class="mb-4">
+                <label for="db_name" class="form-label">Select Business:</label>
+                <select class="form-select" name="db_name" id="db_name" required>
+                    <option value="Khatipatang.db">Khatipatang</option>
+                    <option value="Sajili.db">Sajili</option>
+                    <option value="Ratnakari.db">Ratnakari</option>
+                </select>
+            </div>
+
+            <fieldset class="mb-4">
+                <legend class="form-label">Select Action:</legend>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="add" name="choice" value="1" required>
+                    <label class="form-check-label" for="add">Add Vendor</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="edit" name="choice" value="2">
+                    <label class="form-check-label" for="edit">Edit Vendor</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="delete" name="choice" value="3">
+                    <label class="form-check-label" for="delete">Delete Vendor</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" id="view" name="choice" value="4">
+                    <label class="form-check-label" for="view">View Vendors</label>
+                </div>
+            </fieldset>
+
+            <!-- Vendor ID Field (Initially Hidden) -->
+            <div class="mb-4" id="vendor-id-field" style="display: none;">
+                <label for="vendor_id" class="form-label">Enter Vendor ID (for Edit/Delete):</label>
+                <input type="number" class="form-control" name="vendor_id" id="vendor_id" placeholder="Enter Vendor ID">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Submit</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Show/Hide Vendor ID field based on selected action
+    const businessForm = document.getElementById('business-form');
+    const vendorIdField = document.getElementById('vendor-id-field');
+
+    businessForm.addEventListener('change', () => {
+        const selectedAction = document.querySelector('input[name="choice"]:checked').value;
+
+        // Show Vendor ID field only for Edit/Delete actions
+        if (selectedAction === '2' || selectedAction === '3') {
+            vendorIdField.style.display = 'block';
+        } else {
+            vendorIdField.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}
