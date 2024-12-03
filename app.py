@@ -77,32 +77,27 @@ def init_db():
             image_file_path TEXT
         )
         ''')
-        conn.commit()
-        conn.close()
 
-
-    # Initialize the business databases
-    for db_name in ['Khatipatang.db', 'Sajili.db', 'Ratnakari.db']:
-        conn = sqlite3.connect(db_name)
-        cursor = conn.cursor()
+        # Create the finance table
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS vendors (
+        CREATE TABLE IF NOT EXISTS finance (
             id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            contact_info TEXT,
-            website TEXT,
-            item_descriptions TEXT,
-            images TEXT,
-            shipping_costs REAL,
-            payment_terms TEXT,
-            lead_time TEXT,
-            return_policy TEXT,
-            payment_history TEXT
+            raw_material_cost REAL NOT NULL,
+            delivery_cost REAL NOT NULL,
+            selling_price REAL NOT NULL
         )
         ''')
+
+        # Insert default finance values if not exists
+        cursor.execute('SELECT * FROM finance WHERE id = 1')
+        if not cursor.fetchone():
+            cursor.execute('''
+            INSERT INTO finance (id, raw_material_cost, delivery_cost, selling_price)
+            VALUES (1, 500, 100, 1000)
+            ''')
+        
         conn.commit()
         conn.close()
-
 
 
 # Routes
@@ -127,7 +122,7 @@ def register_admin():
             cursor.execute("INSERT INTO Admin_KPSTR(username, password) VALUES(?,?)", (username, hashed_password))
             conn.commit()
             conn.close()
-            return "Admin registration successful!"
+            return redirect(url_for('business_menu'))
 
     return render_template('register_admin.html')
 
@@ -146,7 +141,7 @@ def login_admin():
             stored_hashed_password = user[2]
             if bcrypt.checkpw(password.encode('utf-8'), stored_hashed_password):
                 session['admin'] = username
-                return f"Welcome dearest, {username}! KPSTR is so delighted to have you here :)"
+                return redirect(url_for('business_menu'))
             else:
                 return "Invalid password. Kindly re-enter the correct password."
         else:
@@ -171,7 +166,7 @@ def register_user():
             cursor.execute("INSERT INTO usersKPSTR(username, password) VALUES(?,?)", (username, hashed_password))
             conn.commit()
             conn.close()
-            return "Customer registration successful!"
+            return redirect(url_for('business_menu'))
 
     return render_template('register_user.html')
 
@@ -238,10 +233,16 @@ def business_menu():
             return redirect(url_for('delete_client', db_name=db_name, client_id=client_id))
         elif choice == '8':  # View Clients
             return redirect(url_for('view_clients', db_name=db_name))
+        elif choice == '9':  # View Finance
+            return redirect(url_for('view_finance', db_name=db_name))
+        elif choice == '10':  # Edit Finance
+            return redirect(url_for('edit_finance', db_name=db_name))
         else:
             return "Invalid choice. Please try again."
 
     return render_template('business_menu.html')
+
+
 
 
 
@@ -485,6 +486,71 @@ def delete_client(db_name, client_id):
     conn.close()
 
     return redirect(url_for('view_clients', db_name=db_name))
+
+
+@app.route('/finance/view/<db_name>', methods=['GET'])
+def view_finance(db_name):
+    conn = sqlite3.connect(db_name)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM finance WHERE id = 1')
+    finance = cursor.fetchone()
+    conn.close()
+
+    if not finance:
+        return "Finance data not found.", 404
+
+    # Prepare finance data for rendering
+    finance_data = {
+        'raw_material_cost': finance[1],
+        'delivery_cost': finance[2],
+        'selling_price': finance[3],
+        'revenue': finance[3] - (finance[1] + finance[2])  # Calculate revenue dynamically
+    }
+
+    return render_template('view_finance.html', finance=finance_data)
+
+
+@app.route('/finance/edit/<db_name>', methods=['GET', 'POST'])
+def edit_finance(db_name):
+    conn = sqlite3.connect(db_name)
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        # Fetch updated data from the form
+        raw_material_cost = float(request.form['raw_material_cost'])
+        delivery_cost = float(request.form['delivery_cost'])
+        selling_price = float(request.form['selling_price'])
+
+        # Update the finance data in the database
+        cursor.execute('''
+            UPDATE finance
+            SET raw_material_cost = ?, delivery_cost = ?, selling_price = ?
+            WHERE id = 1
+        ''', (raw_material_cost, delivery_cost, selling_price))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('view_finance', db_name=db_name))
+
+    # Fetch finance details for GET request
+    cursor.execute('SELECT * FROM finance WHERE id = 1')
+    finance = cursor.fetchone()
+    conn.close()
+
+    if not finance:
+        return "Finance data not found.", 404
+
+    # Prepare finance data for rendering
+    finance_data = {
+        'raw_material_cost': finance[1],
+        'delivery_cost': finance[2],
+        'selling_price': finance[3]
+    }
+
+    return render_template('edit_finance.html', finance=finance_data)
+
+
+
 
 @app.route('/init_db')
 def initialize_database():

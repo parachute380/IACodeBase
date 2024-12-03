@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}View Finance{% endblock %}
+
+{% block content %}
+<div class="card mx-auto mt-5" style="max-width: 600px;">
+    <div class="card-body">
+        <h2 class="card-title text-center">Finance Details</h2>
+        <ul class="list-group">
+            <li class="list-group-item"><strong>Raw Material Cost:</strong> ${{ finance.raw_material_cost }}</li>
+            <li class="list-group-item"><strong>Delivery Cost:</strong> ${{ finance.delivery_cost }}</li>
+            <li class="list-group-item"><strong>Selling Price:</strong> ${{ finance.selling_price }}</li>
+            <li class="list-group-item"><strong>Revenue:</strong> ${{ finance.revenue }}</li>
+        </ul>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('business_menu') }}" class="btn btn-primary">Back to Business Menu</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
